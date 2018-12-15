@@ -3,6 +3,10 @@
     "version": "1.0.0",
     "description": "The Loo Queue",
     "main": "server.js",
+    "engines": {
+        "npm": "5.6.0",
+        "node": "8.9.4"
+    },
     "scripts": {
         "postinstall": "tsc"
     },
