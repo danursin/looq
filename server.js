@@ -1,9 +1,9 @@
-import express, { static } from "express";
+const express = require("express");
 const app = express();
 const public = __dirname + "/build";
 
-app.use(static(public));
-app.get("*", (_req, res) => res.sendFile(`${public}/index.html`));
+app.use(express.static(public));
+app.get("/", (_req, res) => res.render("index"));
 
 const port = process.env.PORT || 2500;
 app.listen(port, () => {
