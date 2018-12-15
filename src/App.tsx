@@ -1,11 +1,25 @@
 import * as React from "react";
 import "./App.css";
+import logo from "./logo.png";
+import Main from "./features/Main";
 
 class App extends React.Component {
     public render() {
         return (
             <div>
-                <nav>looq</nav>
+                <nav className="navbar navbar-light bg-light">
+                    <a className="navbar-brand" href="#">
+                        <img src={logo} width="30" height="30" alt="" />
+                        <span className="pl-2">loo q</span>
+                    </a>
+                </nav>
+                <div className="container-fluid">
+                    <div className="row">
+                        <div className="col">
+                            <Main />
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
