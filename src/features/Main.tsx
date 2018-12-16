@@ -67,27 +67,34 @@ class Main extends React.Component<{}, IMainState> {
 
     public render() {
         return (
-            <div className="row d-flex justify-content-center mt-3">
-                <div className="col-8">
-                    <p className="alert alert-info text-center">You are not yet registered. Enter your name to get started</p>
-                    <form noValidate onSubmit={this.handleNameSubmit}>
-                        <div className="input-group mb-3">
-                            <div className="input-group-prepend">
-                                <span className="input-group-text">@</span>
-                            </div>
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Username"
-                                onChange={this.handleNameChange}
-                                value={this.state.user}
-                            />
+            <div>
+                <h4 className="text-primary">You are not yet registered. Enter your name to get started</h4>
+                <form noValidate onSubmit={this.handleNameSubmit}>
+                    <div className="input-group mb-3">
+                        <div className="input-group-prepend">
+                            <span className="input-group-text">@</span>
                         </div>
-                        <button type="submit" className="btn btn-outline-primary btn-block" disabled={!this.state.user}>
-                            Register
-                        </button>
-                    </form>
-                </div>
+                        <input
+                            type="text"
+                            className="form-control"
+                            placeholder="Username"
+                            onChange={this.handleNameChange}
+                            value={this.state.user}
+                        />
+                        <div className="input-group-append">
+                            <button className="btn btn-outline-primary" type="button" disabled={!this.state.user}>
+                                Register
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <h3 className="text-primary">Active Users</h3>
+                <ul>
+                    {this.state.users.map((user, index) => (
+                        <li key={index}>{user}</li>
+                    ))}
+                </ul>
             </div>
         );
     }

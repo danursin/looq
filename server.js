@@ -16,26 +16,46 @@ const state = {
     loo: "awww shit"
 };
 
+const primaryEvent = "update";
+
 io.sockets.on("connection", socket => {
     console.log(`Connection created: ${socket.id}`);
 
+    socket.on("clear", () => {
+        state.users = [];
+        state.requests = [];
+        socket.emit(primaryEvent, state);
+    });
+
+    socket.on("set-loo", data => {
+        if (data) {
+            state.loo = data;
+        }
+        socket.emit(primaryEvent, state);
+    });
+
     socket.on("register", data => {
+        if (!data || !data.user) {
+            console.error(`Register event raised with incomplete data: ${JSON.stringify(data)}`);
+            return;
+        }
+
         if (state.users.some(u => u === data.user)) {
             console.log(`User ${data.user} is already present`);
         } else {
             state.users.push(data.user);
         }
-        socket.emit("update", state);
+        socket.emit(primaryEvent, state);
     });
 
     socket.on("enqueue", data => {
         console.log(`Enqueue: ${data}`);
-        socket.emit("update", state);
+        socket.emit(primaryEvent, state);
     });
 
     socket.on("dequeue", data => {
         console.log(`Dequeue: ${data}`);
-        socket.emit("update", state);
+        socket.emit(primaryEvent, state);
     });
 
     socket.on("disconnect", () => {
@@ -43,7 +63,7 @@ io.sockets.on("connection", socket => {
         if (userIndex >= 0) {
             state.users.splice(userIndex, 1);
         }
-        socket.emit("update", state);
+        socket.emit(primaryEvent, state);
     });
 });
 
