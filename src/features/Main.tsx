@@ -2,8 +2,14 @@ import * as React from "react";
 import * as io from "socket.io-client";
 
 interface IMainState {
-    user: string | null;
+    user?: string;
     users: string[];
+    loo?: string;
+}
+
+interface IAppState {
+    users: string[];
+    loo: string;
 }
 
 interface IRegisterRequest {
@@ -15,18 +21,31 @@ class Main extends React.Component<{}, IMainState> {
     constructor(props: {}) {
         super(props);
 
-        this.socket = io();
+        this.socket = io("https://looq.herokuapp.com/");
 
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleNameSubmit = this.handleNameSubmit.bind(this);
 
-        const user = localStorage.getItem("APP_USERNAME");
+        const user = localStorage.getItem("APP_USERNAME") || undefined;
         if (user) {
             this.socket.emit("register", { user });
             this.state;
         }
 
         this.state = { user, users: [] };
+
+        this.socket.on("connect", this.handleSocketStateChange);
+        this.socket.on("disconnect", this.handleSocketStateChange);
+        this.socket.on("register", this.handleSocketStateChange);
+        this.socket.on("enqueue", this.handleSocketStateChange);
+        this.socket.on("dequeue", this.handleSocketStateChange);
+    }
+
+    public handleSocketStateChange(appState: IAppState) {
+        this.setState({
+            users: appState.users,
+            loo: appState.loo
+        });
     }
 
     public handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -59,7 +78,13 @@ class Main extends React.Component<{}, IMainState> {
                             <div className="input-group-prepend">
                                 <span className="input-group-text">@</span>
                             </div>
-                            <input type="text" className="form-control" placeholder="Username" onChange={this.handleNameChange} />
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Username"
+                                onChange={this.handleNameChange}
+                                value={this.state.user}
+                            />
                         </div>
                         <button type="submit" className="btn btn-outline-primary btn-block" disabled={!this.state.user}>
                             Register
