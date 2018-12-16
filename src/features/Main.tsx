@@ -37,9 +37,11 @@ class Main extends React.Component<{}, IMainState> {
     }
 
     public handleSocketStateChange(appState: IAppState) {
-        this.setState({
-            appState
-        });
+        if (this.state.user) {
+            this.setState({
+                appState
+            });
+        }
     }
 
     public handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -81,16 +83,13 @@ class Main extends React.Component<{}, IMainState> {
                     <div className="card">
                         <div className="card-header bg-primary text-white">Sign in</div>
                         <div className="card-body">
-                            <h4 className="text-primary">Enter your name to get started</h4>
+                            <h4 className="text-primary">Enter your moniker</h4>
                             <form noValidate onSubmit={this.handleNameSubmit}>
                                 <div className="input-group mb-3">
-                                    <div className="input-group-prepend">
-                                        <span className="input-group-text">@</span>
-                                    </div>
                                     <input
                                         type="text"
                                         className="form-control"
-                                        placeholder="Username"
+                                        placeholder="express yourself"
                                         onChange={this.handleNameChange}
                                         value={this.state.user}
                                     />
