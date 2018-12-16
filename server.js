@@ -30,7 +30,6 @@ io.sockets.on("connection", socket => {
     socket.on("clear-user", user => {
         state.users = state.users.filter(u => u !== user);
         state.requests = state.requests.filter(r => r.user !== user);
-        socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
 
