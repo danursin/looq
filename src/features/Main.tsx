@@ -59,6 +59,8 @@ class Main extends React.Component<{}, IMainState> {
 
     public handleResetApp() {
         if (confirm("Are you sure you want to reset the app?")) {
+            localStorage.removeItem("APP_USERNAME");
+            this.setState({ user: "", appState: undefined });
             this.socket.emit("clear");
         }
     }
@@ -67,7 +69,7 @@ class Main extends React.Component<{}, IMainState> {
         if (confirm("Are you sure you want to clear your user data?")) {
             const oldUsername = this.state.user;
             localStorage.removeItem("APP_USERNAME");
-            this.setState({ user: undefined, appState: undefined });
+            this.setState({ user: "", appState: undefined });
             this.socket.emit("clear-user", oldUsername);
         }
     }
@@ -105,6 +107,8 @@ class Main extends React.Component<{}, IMainState> {
 
                 {this.state.appState && (
                     <div>
+                        <h2 className="text-muted">{this.state.appState.loo}</h2>
+
                         <h3 className="text-primary">Active Users</h3>
                         <ul>
                             {this.state.appState.users.map((user, index) => (
