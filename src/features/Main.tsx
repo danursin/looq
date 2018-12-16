@@ -93,7 +93,7 @@ class Main extends React.Component<{}, IMainState> {
                                         value={this.state.user}
                                     />
                                     <div className="input-group-append">
-                                        <button className="btn btn-outline-primary" type="button" disabled={!this.state.user}>
+                                        <button className="btn btn-outline-primary" type="submit" disabled={!this.state.user}>
                                             Register
                                         </button>
                                     </div>
