@@ -25,6 +25,7 @@ class Main extends React.Component<{}, IMainState> {
 
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleNameSubmit = this.handleNameSubmit.bind(this);
+        this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || undefined;
         if (user) {
