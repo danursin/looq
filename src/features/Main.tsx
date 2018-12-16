@@ -26,7 +26,9 @@ class Main extends React.Component<{}, IMainState> {
 
         const user = localStorage.getItem("APP_USERNAME") || "";
         if (user) {
-            this.socket.emit("register", { user });
+            this.socket.emit("register", { user }, (ack: any) => {
+                console.log(ack);
+            });
         }
 
         this.state = { user };
@@ -50,7 +52,9 @@ class Main extends React.Component<{}, IMainState> {
             return;
         }
         localStorage.setItem("APP_USERNAME", this.state.user);
-        this.socket.emit("register", { user: this.state.user });
+        this.socket.emit("register", { user: this.state.user }, (ack: any) => {
+            console.log(ack);
+        });
     }
 
     public handleResetApp() {
