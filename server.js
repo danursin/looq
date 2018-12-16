@@ -25,17 +25,17 @@ io.sockets.on("connection", socket => {
         } else {
             state.users.push(data.user);
         }
-        socket.emit("register", state);
+        socket.emit("update", state);
     });
 
     socket.on("enqueue", data => {
         console.log(`Enqueue: ${data}`);
-        socket.emit("enqueue", state);
+        socket.emit("update", state);
     });
 
     socket.on("dequeue", data => {
         console.log(`Dequeue: ${data}`);
-        socket.emit("dequeue", state);
+        socket.emit("update", state);
     });
 
     socket.on("disconnect", () => {
@@ -43,7 +43,7 @@ io.sockets.on("connection", socket => {
         if (userIndex >= 0) {
             state.users.splice(userIndex, 1);
         }
-        socket.emit("disconnect", state);
+        socket.emit("update", state);
     });
 });
 
