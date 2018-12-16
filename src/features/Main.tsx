@@ -35,7 +35,7 @@ class Main extends React.Component<{}, IMainState> {
 
         this.state = { user, users: [] };
 
-        this.socket.on("event", this.handleSocketStateChange);
+        this.socket.on("update", this.handleSocketStateChange);
     }
 
     public handleSocketStateChange(appState: IAppState) {
