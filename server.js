@@ -27,6 +27,12 @@ io.sockets.on("connection", socket => {
         socket.emit(primaryEvent, state);
     });
 
+    socket.on("clear-user", user => {
+        state.users = state.users.filter(u => u !== user);
+        state.requests = state.requests.filter(r => r.user !== user);
+        socket.emit(primaryEvent, state);
+    });
+
     socket.on("set-loo", data => {
         if (data) {
             state.loo = data;

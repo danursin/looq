@@ -1,19 +1,14 @@
 import * as React from "react";
 import * as io from "socket.io-client";
 
-interface IMainState {
-    user?: string;
-    users: string[];
-    loo?: string;
-}
-
 interface IAppState {
     users: string[];
     loo: string;
 }
 
-interface IRegisterRequest {
-    user: string;
+interface IMainState {
+    user?: string;
+    appState?: IAppState;
 }
 
 class Main extends React.Component<{}, IMainState> {
@@ -26,6 +21,7 @@ class Main extends React.Component<{}, IMainState> {
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleNameSubmit = this.handleNameSubmit.bind(this);
         this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
+        this.handleResetApp = this.handleResetApp.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || undefined;
         if (user) {
@@ -33,15 +29,14 @@ class Main extends React.Component<{}, IMainState> {
             this.state;
         }
 
-        this.state = { user, users: [] };
+        this.state = { user };
 
         this.socket.on("update", this.handleSocketStateChange);
     }
 
     public handleSocketStateChange(appState: IAppState) {
         this.setState({
-            users: appState.users,
-            loo: appState.loo
+            appState
         });
     }
 
@@ -58,43 +53,75 @@ class Main extends React.Component<{}, IMainState> {
 
         localStorage.setItem("APP_USERNAME", this.state.user);
 
-        const request: IRegisterRequest = {
-            user: this.state.user
-        };
+        this.socket.emit("register", { user: this.state.user });
+    }
 
-        this.socket.emit("register", request);
+    public handleResetApp() {
+        if (confirm("Are you sure you want to reset the app?")) {
+            this.socket.emit("clear");
+        }
+    }
+
+    public handleClearUser() {
+        if (confirm("Are you sure you want to clear your user data?")) {
+            const oldUsername = this.state.user;
+            localStorage.removeItem("APP_USERNAME");
+            this.setState({ user: undefined });
+            this.socket.emit("clear-user", oldUsername);
+        }
     }
 
     public render() {
         return (
-            <div>
-                <h4 className="text-primary">You are not yet registered. Enter your name to get started</h4>
-                <form noValidate onSubmit={this.handleNameSubmit}>
-                    <div className="input-group mb-3">
-                        <div className="input-group-prepend">
-                            <span className="input-group-text">@</span>
-                        </div>
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Username"
-                            onChange={this.handleNameChange}
-                            value={this.state.user}
-                        />
-                        <div className="input-group-append">
-                            <button className="btn btn-outline-primary" type="button" disabled={!this.state.user}>
-                                Register
-                            </button>
+            <div className="mt-2">
+                {!this.state.appState && (
+                    <div className="card">
+                        <div className="card-header bg-primary text-white">Sign in</div>
+                        <div className="card-body">
+                            <h4 className="text-primary">Enter your name to get started</h4>
+                            <form noValidate onSubmit={this.handleNameSubmit}>
+                                <div className="input-group mb-3">
+                                    <div className="input-group-prepend">
+                                        <span className="input-group-text">@</span>
+                                    </div>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Username"
+                                        onChange={this.handleNameChange}
+                                        value={this.state.user}
+                                    />
+                                    <div className="input-group-append">
+                                        <button className="btn btn-outline-primary" type="button" disabled={!this.state.user}>
+                                            Register
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                </form>
+                )}
 
-                <h3 className="text-primary">Active Users</h3>
-                <ul>
-                    {this.state.users.map((user, index) => (
-                        <li key={index}>{user}</li>
-                    ))}
-                </ul>
+                {this.state.appState && (
+                    <div>
+                        <h3 className="text-primary">Active Users</h3>
+                        <ul>
+                            {this.state.appState.users.map((user, index) => (
+                                <li key={index}>{user}</li>
+                            ))}
+                        </ul>
+
+                        <h3 className="text-warning">Clear my user data</h3>
+                        <button type="button" className="btn btn-outline-warning" onClick={this.handleClearUser}>
+                            Clear your current settings
+                        </button>
+
+                        <h3 className="text-danger">Reset</h3>
+                        <button type="button" className="btn btn-outline-danger" onClick={this.handleResetApp}>
+                            Reset app to initial state
+                        </button>
+                    </div>
+                )}
             </div>
         );
     }
