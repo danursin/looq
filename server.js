@@ -24,20 +24,20 @@ io.sockets.on("connection", socket => {
     socket.on("clear", () => {
         state.users = [];
         state.requests = [];
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("clear-user", user => {
         state.users = state.users.filter(u => u !== user);
         state.requests = state.requests.filter(r => r.user !== user);
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("set-loo", data => {
         if (data) {
             state.loo = data;
         }
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("register", data => {
@@ -51,17 +51,17 @@ io.sockets.on("connection", socket => {
         } else {
             state.users.push(data.user);
         }
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("enqueue", data => {
         console.log(`Enqueue: ${data}`);
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("dequeue", data => {
         console.log(`Dequeue: ${data}`);
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("disconnect", () => {
@@ -69,7 +69,7 @@ io.sockets.on("connection", socket => {
         if (userIndex >= 0) {
             state.users.splice(userIndex, 1);
         }
-        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
     });
 });
 

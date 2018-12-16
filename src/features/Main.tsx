@@ -22,11 +22,11 @@ class Main extends React.Component<{}, IMainState> {
         this.handleNameSubmit = this.handleNameSubmit.bind(this);
         this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
         this.handleResetApp = this.handleResetApp.bind(this);
+        this.handleClearUser = this.handleClearUser.bind(this);
 
-        const user = localStorage.getItem("APP_USERNAME") || undefined;
+        const user = localStorage.getItem("APP_USERNAME") || "";
         if (user) {
             this.socket.emit("register", { user });
-            this.state;
         }
 
         this.state = { user };
@@ -46,13 +46,10 @@ class Main extends React.Component<{}, IMainState> {
 
     public handleNameSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-
         if (!this.state.user) {
             return;
         }
-
         localStorage.setItem("APP_USERNAME", this.state.user);
-
         this.socket.emit("register", { user: this.state.user });
     }
 
