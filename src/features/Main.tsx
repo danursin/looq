@@ -109,13 +109,15 @@ class Main extends React.Component<{}, IMainState> {
                         <h2 className="text-muted">{this.state.appState.loo}</h2>
 
                         <h3 className="text-primary">Active Users</h3>
-                        <ul>
+                        <ul className="list-group list-group-flush">
                             {this.state.appState.users.map((user, index) => (
-                                <li key={index}>{user}</li>
+                                <li className="list-group-item" key={index}>
+                                    {user}
+                                </li>
                             ))}
                         </ul>
 
-                        <h3 className="text-warning">Clear my user data</h3>
+                        <h3 className="text-warning mt-5">Clear my user data</h3>
                         <button type="button" className="btn btn-outline-warning" onClick={this.handleClearUser}>
                             Clear your current settings
                         </button>
