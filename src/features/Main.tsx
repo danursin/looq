@@ -1,19 +1,73 @@
 import * as React from "react";
 import * as io from "socket.io-client";
 
-class Main extends React.Component {
+interface IMainState {
+    user: string | null;
+    users: string[];
+}
+
+interface IRegisterRequest {
+    user: string;
+}
+
+class Main extends React.Component<{}, IMainState> {
     private socket: SocketIOClient.Socket;
     constructor(props: {}) {
         super(props);
+
         this.socket = io();
 
-        this.socket.emit("register", {
-            hello: "World"
-        });
+        this.handleNameChange = this.handleNameChange.bind(this);
+        this.handleNameSubmit = this.handleNameSubmit.bind(this);
+
+        const user = localStorage.getItem("APP_USERNAME");
+        if (user) {
+            this.socket.emit("register", { user });
+            this.state;
+        }
+
+        this.state = { user, users: [] };
+    }
+
+    public handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ user: event.target.value });
+    }
+
+    public handleNameSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+
+        if (!this.state.user) {
+            return;
+        }
+
+        localStorage.setItem("APP_USERNAME", this.state.user);
+
+        const request: IRegisterRequest = {
+            user: this.state.user
+        };
+
+        this.socket.emit("register", request);
     }
 
     public render() {
-        return <p>Hello</p>;
+        return (
+            <div className="row d-flex justify-content-center mt-3">
+                <div className="col-8">
+                    <p className="alert alert-info text-center">You are not yet registered. Enter your name to get started</p>
+                    <form noValidate onSubmit={this.handleNameSubmit}>
+                        <div className="input-group mb-3">
+                            <div className="input-group-prepend">
+                                <span className="input-group-text">@</span>
+                            </div>
+                            <input type="text" className="form-control" placeholder="Username" onChange={this.handleNameChange} />
+                        </div>
+                        <button type="submit" className="btn btn-outline-primary btn-block" disabled={!this.state.user}>
+                            Register
+                        </button>
+                    </form>
+                </div>
+            </div>
+        );
     }
 }
 
