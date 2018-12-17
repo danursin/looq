@@ -24,6 +24,7 @@ io.sockets.on("connection", socket => {
     socket.on("clear", () => {
         state.users = [];
         state.requests = [];
+        state.loo = "awww shit";
         socket.broadcast.emit(primaryEvent, state);
     });
 
@@ -57,11 +58,7 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
-        const userIndex = state.users.indexOf(u => u === data.user);
-        if (userIndex >= 0) {
-            state.users.splice(userIndex, 1);
-        }
-        socket.broadcast.emit(primaryEvent, state);
+        console.log("Disconnected");
     });
 });
 
