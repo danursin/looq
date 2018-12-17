@@ -8,6 +8,8 @@ interface IAppState {
 
 interface IMainState {
     user?: string;
+    loo?: string;
+    isEditingLoo: boolean;
     appState?: IAppState;
 }
 
@@ -19,10 +21,13 @@ class Main extends React.Component<{}, IMainState> {
         this.socket = io("https://looq.herokuapp.com/");
 
         this.handleNameChange = this.handleNameChange.bind(this);
+        this.handleLooNameChange = this.handleLooNameChange.bind(this);
         this.handleNameSubmit = this.handleNameSubmit.bind(this);
+        this.handleLooNameSubmit = this.handleLooNameSubmit.bind(this);
         this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
         this.handleResetApp = this.handleResetApp.bind(this);
         this.handleClearUser = this.handleClearUser.bind(this);
+        this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
         if (user) {
@@ -31,7 +36,7 @@ class Main extends React.Component<{}, IMainState> {
             });
         }
 
-        this.state = { user };
+        this.state = { user, loo: "", isEditingLoo: false };
 
         this.socket.on("update", this.handleSocketStateChange);
     }
@@ -48,13 +53,29 @@ class Main extends React.Component<{}, IMainState> {
         this.setState({ user: event.target.value });
     }
 
+    public handleLooNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ loo: event.target.value });
+    }
+
+    public handleLooNameSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        if (!this.state.loo) {
+            return;
+        }
+        this.socket.emit("set-loo", this.state.loo, (ack: any) => {
+            console.log(ack);
+        });
+
+        this.setState({ isEditingLoo: false });
+    }
+
     public handleNameSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (!this.state.user) {
             return;
         }
         localStorage.setItem("APP_USERNAME", this.state.user);
-        this.socket.emit("register", { user: this.state.user }, (ack: any) => {
+        this.socket.emit("register", this.state.user, (ack: any) => {
             console.log(ack);
         });
     }
@@ -74,6 +95,10 @@ class Main extends React.Component<{}, IMainState> {
             this.setState({ user: "", appState: undefined });
             this.socket.emit("clear-user", oldUsername);
         }
+    }
+
+    public setIsEditingLoo(state: boolean) {
+        this.setState({ isEditingLoo: state });
     }
 
     public render() {
@@ -106,7 +131,43 @@ class Main extends React.Component<{}, IMainState> {
 
                 {this.state.appState && (
                     <div>
-                        <h2 className="text-muted">{this.state.appState.loo}</h2>
+                        {!this.state.isEditingLoo && (
+                            <h2 className="text-muted">
+                                {this.state.appState.loo}
+                                <button type="button" className="btn btn-link" onClick={() => this.setIsEditingLoo(true)}>
+                                    Edit
+                                </button>
+                            </h2>
+                        )}
+                        {this.state.isEditingLoo && (
+                            <form noValidate onSubmit={this.handleLooNameSubmit}>
+                                <div className="input-group mb-3">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="loo needs a name"
+                                        onChange={this.handleLooNameChange}
+                                        value={this.state.loo}
+                                    />
+                                    <div className="input-group-append">
+                                        <button
+                                            className="btn btn-outline-dark"
+                                            type="button"
+                                            onClick={() => {
+                                                this.setIsEditingLoo(false);
+                                            }}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                    <div className="input-group-append">
+                                        <button className="btn btn-outline-primary" type="submit" disabled={!this.state.loo}>
+                                            Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        )}
 
                         <h3 className="text-primary">Active Users</h3>
                         <ul className="list-group list-group-flush">

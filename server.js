@@ -37,19 +37,20 @@ io.sockets.on("connection", socket => {
         if (data) {
             state.loo = data;
         }
+        socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
 
-    socket.on("register", data => {
-        if (!data || !data.user) {
-            console.error(`Register event raised with incomplete data: ${JSON.stringify(data)}`);
+    socket.on("register", user => {
+        if (!user) {
+            console.error(`Register event raised with incomplete data: ${JSON.stringify(user)}`);
             return;
         }
 
-        if (state.users.some(u => u === data.user)) {
-            console.log(`User ${data.user} is already present`);
+        if (state.users.some(u => u === user)) {
+            console.log(`User ${user} is already present`);
         } else {
-            state.users.push(data.user);
+            state.users.push(user);
         }
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
