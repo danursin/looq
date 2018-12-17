@@ -31,7 +31,7 @@ class Main extends React.Component<{}, IMainState> {
 
         const user = localStorage.getItem("APP_USERNAME") || "";
         if (user) {
-            this.socket.emit("register", { user }, (ack: any) => {
+            this.socket.emit("register", user, (ack: any) => {
                 console.log(ack);
             });
         }
