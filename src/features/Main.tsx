@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as io from "socket.io-client";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IAppState {
     users: string[];
@@ -108,7 +109,10 @@ class Main extends React.Component<{}, IMainState> {
                     <div className="card">
                         <div className="card-header bg-primary text-white">Sign in</div>
                         <div className="card-body">
-                            <h4 className="text-primary">Enter your moniker</h4>
+                            <h4 className="text-primary">
+                                <FontAwesomeIcon icon="user-alt" className="mr-1" />
+                                Enter your moniker
+                            </h4>
                             <form noValidate onSubmit={this.handleNameSubmit}>
                                 <div className="input-group mb-3">
                                     <input
@@ -134,7 +138,9 @@ class Main extends React.Component<{}, IMainState> {
                         {!this.state.isEditingLoo && (
                             <h2 className="text-muted">
                                 {this.state.appState.loo}
+
                                 <button type="button" className="btn btn-link" onClick={() => this.setIsEditingLoo(true)}>
+                                    <FontAwesomeIcon icon="pencil-alt" />
                                     Edit
                                 </button>
                             </h2>
@@ -173,17 +179,18 @@ class Main extends React.Component<{}, IMainState> {
                         <ul className="list-group list-group-flush">
                             {this.state.appState.users.map((user, index) => (
                                 <li className="list-group-item" key={index}>
+                                    <FontAwesomeIcon icon="user-alt" className="mr-1" />
                                     {user}
                                 </li>
                             ))}
                         </ul>
 
-                        <h3 className="text-warning mt-5">Clear my user data</h3>
+                        <h3 className="text-warning mt-3">Clear my user data</h3>
                         <button type="button" className="btn btn-outline-warning" onClick={this.handleClearUser}>
                             Clear your current settings
                         </button>
 
-                        <h3 className="text-danger">Reset</h3>
+                        <h3 className="text-danger mt-3">Reset</h3>
                         <button type="button" className="btn btn-outline-danger" onClick={this.handleResetApp}>
                             Reset app to initial state
                         </button>

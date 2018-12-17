@@ -3,6 +3,11 @@ import "./App.css";
 import logo from "./logo.png";
 import Main from "./features/Main";
 
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faUserAlt, faPencilAlt } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faUserAlt), faPencilAlt;
+
 class App extends React.Component {
     public render() {
         return (
