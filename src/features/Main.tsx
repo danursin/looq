@@ -92,9 +92,7 @@ class Main extends React.Component<{}, IMainState> {
             return;
         }
         localStorage.setItem("APP_USERNAME", this.state.user);
-        this.socket.emit("register", this.state.user, (ack: any) => {
-            console.log(ack);
-        });
+        this.socket.emit("register", this.state.user);
     }
 
     public handleResetApp() {
@@ -125,7 +123,7 @@ class Main extends React.Component<{}, IMainState> {
     }
 
     public userIsInQueue(): boolean {
-        return !!this.state.appState && !!this.state.appState.users.find(u => u.connectionID === this.socket.id);
+        return !!this.state.appState && !this.state.appState.users.find(u => u.connectionID === this.socket.id);
     }
 
     public handleDequeue() {

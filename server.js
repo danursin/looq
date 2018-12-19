@@ -59,6 +59,7 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("register", user => {
+        console.log(`Registering: ${user}`);
         const existingUser = state.users.find(u => u.connectionID === socket.id);
         existingUser.user = user;
 
