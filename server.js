@@ -12,32 +12,40 @@ const io = socketIO.listen(server);
 
 const state = {
     users: [],
-    requests: [],
+    queue: [],
     loo: "awww shit"
 };
 
 const primaryEvent = "update";
 
 io.sockets.on("connection", socket => {
-    console.log(`Connection created: ${socket.id}`);
+    state.users.push({ connectionID: socket.id });
 
     socket.on("clear", () => {
         state.users = [];
-        state.requests = [];
+        state.queue = [];
         state.loo = "awww shit";
         socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("clear-user", user => {
         state.users = state.users.filter(u => u !== user);
-        state.requests = state.requests.filter(r => r.user !== user);
+        state.queue = state.queue.filter(r => r.user !== user);
+        socket.broadcast.emit(primaryEvent, state);
+    });
+
+    socket.on("enqueue", data => {
+        state.queue.push(data);
+        socket.broadcast.emit(primaryEvent, state);
+    });
+
+    socket.on("dequeue", data => {
+        state.queue = state.queue.filter(r => r.user !== user);
         socket.broadcast.emit(primaryEvent, state);
     });
 
     socket.on("set-loo", data => {
-        if (data) {
-            state.loo = data;
-        }
+        state.loo = data;
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
@@ -58,7 +66,8 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
-        console.log("Disconnected");
+        state.users = state.users.filter(u => u.connectionID !== socket.id);
+        socket.broadcast.emit(primaryEvent, state);
     });
 });
 

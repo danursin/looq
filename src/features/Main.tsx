@@ -3,6 +3,10 @@ import * as io from "socket.io-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface IAppState {
+    queue: Array<{
+        user: string;
+        note?: string;
+    }>;
     users: string[];
     loo: string;
 }
@@ -139,9 +143,13 @@ class Main extends React.Component<{}, IMainState> {
                             <h2 className="text-muted">
                                 {this.state.appState.loo}
 
-                                <button type="button" className="btn btn-link" onClick={() => this.setIsEditingLoo(true)}>
+                                <button
+                                    type="button"
+                                    className="btn btn-link"
+                                    onClick={() => this.setIsEditingLoo(true)}
+                                    title="Edit Loo Name"
+                                >
                                     <FontAwesomeIcon icon="pencil-alt" />
-                                    Edit
                                 </button>
                             </h2>
                         )}
@@ -156,13 +164,7 @@ class Main extends React.Component<{}, IMainState> {
                                         value={this.state.loo}
                                     />
                                     <div className="input-group-append">
-                                        <button
-                                            className="btn btn-outline-dark"
-                                            type="button"
-                                            onClick={() => {
-                                                this.setIsEditingLoo(false);
-                                            }}
-                                        >
+                                        <button className="btn btn-outline-dark" type="button" onClick={() => this.setIsEditingLoo(false)}>
                                             Cancel
                                         </button>
                                     </div>
@@ -175,12 +177,16 @@ class Main extends React.Component<{}, IMainState> {
                             </form>
                         )}
 
-                        <h3 className="text-primary">Active Users</h3>
-                        <ul className="list-group list-group-flush">
-                            {this.state.appState.users.map((user, index) => (
+                        <h3 className="text-primary">Current Queue</h3>
+                        <ul className="list-group">
+                            {this.state.appState.queue.map((item, index) => (
                                 <li className="list-group-item" key={index}>
-                                    <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                    {user}
+                                    <h4>
+                                        <FontAwesomeIcon icon="user-alt" className="mr-1" />
+                                        {item.user}
+                                    </h4>
+
+                                    {item.note && <small className="text-muted">{item.note}</small>}
                                 </li>
                             ))}
                         </ul>
