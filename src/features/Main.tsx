@@ -12,8 +12,9 @@ interface IAppState {
 }
 
 interface IMainState {
-    user?: string;
-    loo?: string;
+    user: string;
+    loo: string;
+    queueNote: string;
     isEditingLoo: boolean;
     appState?: IAppState;
 }
@@ -32,6 +33,9 @@ class Main extends React.Component<{}, IMainState> {
         this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
         this.handleResetApp = this.handleResetApp.bind(this);
         this.handleClearUser = this.handleClearUser.bind(this);
+        this.handleEnqueue = this.handleEnqueue.bind(this);
+        this.handleDequeue = this.handleDequeue.bind(this);
+        this.handleQueueNoteChange = this.handleQueueNoteChange.bind(this);
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
@@ -41,7 +45,7 @@ class Main extends React.Component<{}, IMainState> {
             });
         }
 
-        this.state = { user, loo: "", isEditingLoo: false };
+        this.state = { user, loo: "", queueNote: "", isEditingLoo: false };
 
         this.socket.on("update", this.handleSocketStateChange);
     }
@@ -52,6 +56,10 @@ class Main extends React.Component<{}, IMainState> {
                 appState
             });
         }
+    }
+
+    public handleQueueNoteChange(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ queueNote: event.target.value });
     }
 
     public handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -100,6 +108,17 @@ class Main extends React.Component<{}, IMainState> {
             this.setState({ user: "", appState: undefined });
             this.socket.emit("clear-user", oldUsername);
         }
+    }
+
+    public handleEnqueue(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        this.socket.emit("enqueue", {
+            note: this.state.queueNote
+        });
+    }
+
+    public handleDequeue() {
+        this.socket.emit("dequeue");
     }
 
     public setIsEditingLoo(state: boolean) {
@@ -177,27 +196,58 @@ class Main extends React.Component<{}, IMainState> {
                             </form>
                         )}
 
-                        <h3 className="text-primary">Current Queue</h3>
-                        <ul className="list-group">
-                            {this.state.appState.queue.map((item, index) => (
-                                <li className="list-group-item" key={index}>
-                                    <h4>
-                                        <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                        {item.user}
-                                    </h4>
+                        {!this.state.appState.queue.length && (
+                            <p className="alert alert-info">
+                                <FontAwesomeIcon icon="info-circle" className="mr-1" />
+                                The Loo Q is empty, go ahead!
+                            </p>
+                        )}
 
-                                    {item.note && <small className="text-muted">{item.note}</small>}
-                                </li>
-                            ))}
-                        </ul>
+                        {!!this.state.appState.queue.length && (
+                            <div>
+                                <h3 className="text-primary">Current Loo Q</h3>
+                                <ul className="list-group">
+                                    {this.state.appState.queue.map((item, index) => (
+                                        <li className="list-group-item" key={index}>
+                                            <h4>
+                                                <FontAwesomeIcon icon="user-alt" className="mr-1" />
+                                                {item.user}
+                                            </h4>
 
-                        <h3 className="text-warning mt-3">Clear my user data</h3>
-                        <button type="button" className="btn btn-outline-warning" onClick={this.handleClearUser}>
+                                            {item.note && <small className="text-muted">{item.note}</small>}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+
+                        <h3 className="text-primary">Enter the Loo Q!</h3>
+                        <form noValidate onSubmit={this.handleEnqueue}>
+                            <div className="input-group mb-3">
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="Describe your intent..."
+                                    onChange={this.handleQueueNoteChange}
+                                    value={this.state.queueNote}
+                                />
+                                <div className="input-group-append">
+                                    <button className="btn btn-outline-primary" type="submit">
+                                        GO
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <h3 className="text-warning mt-3" style={{ paddingTop: "300px" }}>
+                            Clear my user data
+                        </h3>
+                        <button type="button" className="btn btn-block btn-outline-warning" onClick={this.handleClearUser}>
                             Clear your current settings
                         </button>
 
                         <h3 className="text-danger mt-3">Reset</h3>
-                        <button type="button" className="btn btn-outline-danger" onClick={this.handleResetApp}>
+                        <button type="button" className="btn btn-block btn-outline-danger" onClick={this.handleResetApp}>
                             Reset app to initial state
                         </button>
                     </div>

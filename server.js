@@ -35,12 +35,19 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("enqueue", data => {
-        state.queue.push(data);
+        const user = state.users.find(u => u.connectionID === socket.ID);
+        state.queue.push({
+            user,
+            ...data
+        });
+        socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
 
-    socket.on("dequeue", data => {
+    socket.on("dequeue", () => {
+        const user = state.users.find(u => u.connectionID === socket.ID);
         state.queue = state.queue.filter(r => r.user !== user);
+        socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
 
