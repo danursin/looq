@@ -10,13 +10,14 @@ const port = +(process.env.PORT || 2500);
 
 const io = socketIO.listen(server);
 
+const primaryEvent = "update";
+const defaultLooName = "loo dog";
+
 const state = {
     users: [],
     queue: [],
-    loo: "awww shit"
+    loo: defaultLooName
 };
-
-const primaryEvent = "update";
 
 io.sockets.on("connection", socket => {
     state.users.push({ connectionID: socket.id });
@@ -24,7 +25,7 @@ io.sockets.on("connection", socket => {
     socket.on("clear", () => {
         state.users = [];
         state.queue = [];
-        state.loo = "awww shit";
+        state.loo = defaultLooName;
         socket.broadcast.emit(primaryEvent, state);
     });
 
@@ -52,7 +53,7 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("set-loo", data => {
-        state.loo = data;
+        state.loo = data || defaultLooName;
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
