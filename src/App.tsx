@@ -4,9 +4,9 @@ import logo from "./logo.png";
 import Main from "./features/Main";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faUserAlt, faPencilAlt, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import { faUserAlt, faPencilAlt, faInfoCircle, faTrash, faToilet, faToiletPaper } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faUserAlt, faPencilAlt, faInfoCircle);
+library.add(faUserAlt, faPencilAlt, faInfoCircle, faTrash, faToilet, faToiletPaper);
 
 class App extends React.Component {
     public render() {

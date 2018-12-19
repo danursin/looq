@@ -59,16 +59,9 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("register", user => {
-        if (!user) {
-            console.error(`Register event raised with incomplete data: ${JSON.stringify(user)}`);
-            return;
-        }
+        const existingUser = state.users.find(u => u.connectionID === socket.id);
+        existingUser.user = user;
 
-        if (state.users.some(u => u === user)) {
-            console.log(`User ${user} is already present`);
-        } else {
-            state.users.push(user);
-        }
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });

@@ -7,7 +7,10 @@ interface IAppState {
         user: string;
         note?: string;
     }>;
-    users: string[];
+    users: Array<{
+        user: string;
+        connectionID: string;
+    }>;
     loo: string;
 }
 
@@ -37,6 +40,7 @@ class Main extends React.Component<{}, IMainState> {
         this.handleDequeue = this.handleDequeue.bind(this);
         this.handleQueueNoteChange = this.handleQueueNoteChange.bind(this);
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
+        this.userIsInQueue = this.userIsInQueue.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
         if (user) {
@@ -96,7 +100,7 @@ class Main extends React.Component<{}, IMainState> {
     public handleResetApp() {
         if (confirm("Are you sure you want to reset the app?")) {
             localStorage.removeItem("APP_USERNAME");
-            this.setState({ user: "", appState: undefined });
+            this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
             this.socket.emit("clear");
         }
     }
@@ -105,7 +109,7 @@ class Main extends React.Component<{}, IMainState> {
         if (confirm("Are you sure you want to clear your user data?")) {
             const oldUsername = this.state.user;
             localStorage.removeItem("APP_USERNAME");
-            this.setState({ user: "", appState: undefined });
+            this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
             this.socket.emit("clear-user", oldUsername);
         }
     }
@@ -115,6 +119,13 @@ class Main extends React.Component<{}, IMainState> {
         this.socket.emit("enqueue", {
             note: this.state.queueNote
         });
+        this.setState({
+            queueNote: ""
+        });
+    }
+
+    public userIsInQueue(): boolean {
+        return !!this.state.appState && !!this.state.appState.users.find(u => u.connectionID === this.socket.id);
     }
 
     public handleDequeue() {
@@ -198,7 +209,7 @@ class Main extends React.Component<{}, IMainState> {
 
                         {!this.state.appState.queue.length && (
                             <p className="alert alert-info">
-                                <FontAwesomeIcon icon="info-circle" className="mr-1" />
+                                <FontAwesomeIcon icon="toilet" className="mr-1" />
                                 The Loo Q is empty, go ahead!
                             </p>
                         )}
@@ -209,38 +220,48 @@ class Main extends React.Component<{}, IMainState> {
                                 <ul className="list-group">
                                     {this.state.appState.queue.map((item, index) => (
                                         <li className="list-group-item" key={index}>
-                                            <h4>
-                                                <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                                {item.user}
-                                            </h4>
+                                            <div className="d-flex justify-content-between">
+                                                <h4 className="mb-0 my-auto">
+                                                    <FontAwesomeIcon icon="user-alt" className="mr-1" />
+                                                    {item.user}
+                                                </h4>
 
-                                            {item.note && <small className="text-muted">{item.note}</small>}
+                                                {item.note && <span className="text-muted my-auto">{item.note}</span>}
+
+                                                <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
+                                                    <FontAwesomeIcon icon="trash" />
+                                                </button>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
                             </div>
                         )}
 
-                        <h3 className="text-primary">Enter the Loo Q!</h3>
-                        <form noValidate onSubmit={this.handleEnqueue}>
-                            <div className="input-group mb-3">
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    placeholder="Describe your intent..."
-                                    onChange={this.handleQueueNoteChange}
-                                    value={this.state.queueNote}
-                                />
-                                <div className="input-group-append">
-                                    <button className="btn btn-outline-primary" type="submit">
-                                        GO
-                                    </button>
-                                </div>
+                        {!this.userIsInQueue() && (
+                            <div>
+                                <h3 className="text-primary">Enter the Loo Q!</h3>
+                                <form noValidate onSubmit={this.handleEnqueue}>
+                                    <div className="input-group mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Describe your intent..."
+                                            onChange={this.handleQueueNoteChange}
+                                            value={this.state.queueNote}
+                                        />
+                                        <div className="input-group-append">
+                                            <button className="btn btn-outline-primary" type="submit">
+                                                GO
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
-                        </form>
+                        )}
 
                         <h3 className="text-warning mt-3" style={{ paddingTop: "300px" }}>
-                            Clear my user data
+                            Clear my user data <small className="text-muted">(logged in as {this.state.user})</small>
                         </h3>
                         <button type="button" className="btn btn-block btn-outline-warning" onClick={this.handleClearUser}>
                             Clear your current settings
