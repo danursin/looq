@@ -36,22 +36,18 @@ io.sockets.on("connection", socket => {
         socket.broadcast.emit(primaryEvent, state);
     });
 
-    socket.on("enqueue", data => {
-        console.log(`Enqueue from id: ${socket.id}`);
-
-        const user = state.users.find(u => u.connectionID === socket.ID);
+    socket.on("enqueue", id => {
+        const user = state.users.find(u => id === u.id);
         state.queue.push({
-            user,
-            ...data
+            user
         });
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
 
-    socket.on("dequeue", () => {
-        console.log(`Dequeue from id: ${socket.id}`);
-        const user = state.users.find(u => u.connectionID === socket.ID);
-        state.queue = state.queue.filter(r => r.user !== user);
+    socket.on("dequeue", id => {
+        const user = state.users.find(u => id === u.id);
+        state.queue = state.queue.filter(r => id !== u.id);
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });
@@ -68,12 +64,15 @@ io.sockets.on("connection", socket => {
         const existingUser = state.users.find(u => u.id === socket.id);
         existingUser.user = data.user;
 
-        socket.emit(primaryEvent, state);
-        socket.broadcast.emit(primaryEvent, state);
+        socket.emit("register", {
+            id: socket.id,
+            state
+        });
+        socket.broadcast.emit("register", state);
     });
 
     socket.on("disconnect", () => {
-        state.users = state.users.filter(u => u.connectionID !== socket.id);
+        state.users = state.users.filter(u => u.id !== socket.id);
         socket.broadcast.emit(primaryEvent, state);
     });
 });

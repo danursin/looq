@@ -15,6 +15,7 @@ interface IAppState {
 }
 
 interface IMainState {
+    id: string | null;
     user: string;
     loo: string;
     queueNote: string;
@@ -28,7 +29,6 @@ class Main extends React.Component<{}, IMainState> {
         super(props);
 
         this.socket = io("https://looq.herokuapp.com/");
-        console.log(`SocketID: ${this.socket.id}`);
 
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleLooNameChange = this.handleLooNameChange.bind(this);
@@ -40,14 +40,16 @@ class Main extends React.Component<{}, IMainState> {
         this.handleEnqueue = this.handleEnqueue.bind(this);
         this.handleDequeue = this.handleDequeue.bind(this);
         this.handleQueueNoteChange = this.handleQueueNoteChange.bind(this);
+        this.handleSocketRegistration = this.handleSocketRegistration.bind(this);
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
         this.userIsInQueue = this.userIsInQueue.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
 
-        this.state = { user, loo: "", queueNote: "", isEditingLoo: false };
+        this.state = { user, id: null, loo: "", queueNote: "", isEditingLoo: false };
 
         this.socket.on("update", this.handleSocketStateChange);
+        this.socket.on("register", this.handleSocketRegistration);
     }
 
     public componentDidMount() {
@@ -57,6 +59,13 @@ class Main extends React.Component<{}, IMainState> {
                 user: this.state.user
             });
         }
+    }
+
+    public handleSocketRegistration(data: { id: string; state: IAppState }) {
+        this.setState({
+            id: data.id,
+            appState: data.state
+        });
     }
 
     public handleSocketStateChange(appState: IAppState) {
