@@ -72,6 +72,7 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("disconnect", () => {
+        console.log(`Attempting to remove user with socketID: ${socket.id}`);
         state.users = state.users.filter(u => u.id !== socket.id);
         socket.broadcast.emit(primaryEvent, state);
     });
