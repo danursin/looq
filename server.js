@@ -59,9 +59,10 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("register", data => {
-        console.log(`Registering: ${data.user} with socket ID ${data.id}`);
-        console.log(`Other Users: ${JSON.stringify(state.users)}`);
         const existingUser = state.users.find(u => u.id === socket.id);
+        if (!existingUser) {
+            console.log(`Could not find a user with id ${socket.id} in ${JSON.stringify(state.users)}`);
+        }
         existingUser.user = data.user;
 
         socket.emit("register", {
