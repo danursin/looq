@@ -21,6 +21,7 @@ const state = {
 
 io.sockets.on("connection", socket => {
     state.users.push({ connectionID: socket.id });
+    console.log(`Users: ${JSON.stringify(state.users)}`);
 
     socket.on("clear", () => {
         state.users = [];
@@ -59,8 +60,10 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("register", user => {
-        console.log(`Registering: ${user}`);
+        console.log(`Registering: ${user} with socket ID ${socket.id}`);
+        console.log(`Other Users: ${JSON.stringify(state.users)}`);
         const existingUser = state.users.find(u => u.connectionID === socket.id);
+
         existingUser.user = user;
 
         socket.emit(primaryEvent, state);
