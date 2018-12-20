@@ -28,6 +28,7 @@ class Main extends React.Component<{}, IMainState> {
         super(props);
 
         this.socket = io("https://looq.herokuapp.com/");
+        console.log(`SocketID: ${this.socket.id}`);
 
         this.handleNameChange = this.handleNameChange.bind(this);
         this.handleLooNameChange = this.handleLooNameChange.bind(this);
@@ -43,15 +44,19 @@ class Main extends React.Component<{}, IMainState> {
         this.userIsInQueue = this.userIsInQueue.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
-        if (user) {
-            this.socket.emit("register", user, (ack: any) => {
-                console.log(ack);
-            });
-        }
 
         this.state = { user, loo: "", queueNote: "", isEditingLoo: false };
 
         this.socket.on("update", this.handleSocketStateChange);
+    }
+
+    public componentDidMount() {
+        if (this.state.user) {
+            this.socket.emit("register", {
+                id: this.socket.id,
+                user: this.state.user
+            });
+        }
     }
 
     public handleSocketStateChange(appState: IAppState) {
@@ -92,7 +97,10 @@ class Main extends React.Component<{}, IMainState> {
             return;
         }
         localStorage.setItem("APP_USERNAME", this.state.user);
-        this.socket.emit("register", this.state.user);
+        this.socket.emit("register", {
+            id: this.socket.id,
+            user: this.state.user
+        });
     }
 
     public handleResetApp() {

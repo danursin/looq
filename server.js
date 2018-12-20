@@ -20,7 +20,7 @@ const state = {
 };
 
 io.sockets.on("connection", socket => {
-    state.users.push({ connectionID: socket.id });
+    state.users.push({ id: socket.id });
     console.log(`Users: ${JSON.stringify(state.users)}`);
 
     socket.on("clear", () => {
@@ -37,6 +37,8 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("enqueue", data => {
+        console.log(`Enqueue from id: ${socket.id}`);
+
         const user = state.users.find(u => u.connectionID === socket.ID);
         state.queue.push({
             user,
@@ -47,6 +49,7 @@ io.sockets.on("connection", socket => {
     });
 
     socket.on("dequeue", () => {
+        console.log(`Dequeue from id: ${socket.id}`);
         const user = state.users.find(u => u.connectionID === socket.ID);
         state.queue = state.queue.filter(r => r.user !== user);
         socket.emit(primaryEvent, state);
@@ -59,12 +62,11 @@ io.sockets.on("connection", socket => {
         socket.broadcast.emit(primaryEvent, state);
     });
 
-    socket.on("register", user => {
-        console.log(`Registering: ${user} with socket ID ${socket.id}`);
+    socket.on("register", data => {
+        console.log(`Registering: ${data.user} with socket ID ${data.id}`);
         console.log(`Other Users: ${JSON.stringify(state.users)}`);
-        const existingUser = state.users.find(u => u.connectionID === socket.id);
-
-        existingUser.user = user;
+        const existingUser = state.users.find(u => u.id === socket.id);
+        existingUser.user = data.user;
 
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
