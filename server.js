@@ -36,10 +36,11 @@ io.sockets.on("connection", socket => {
         socket.broadcast.emit(primaryEvent, state);
     });
 
-    socket.on("enqueue", id => {
-        const user = state.users.find(u => id === u.id);
+    socket.on("enqueue", data => {
+        const user = state.users.find(u => id === data.id);
         state.queue.push({
-            user
+            user,
+            note: data.queueNote
         });
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);

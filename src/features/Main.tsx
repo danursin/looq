@@ -132,6 +132,7 @@ class Main extends React.Component<{}, IMainState> {
     public handleEnqueue(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         this.socket.emit("enqueue", {
+            id: this.state.id,
             note: this.state.queueNote
         });
         this.setState({
@@ -253,27 +254,25 @@ class Main extends React.Component<{}, IMainState> {
                             </div>
                         )}
 
-                        {!this.userIsInQueue() && (
-                            <div>
-                                <h3 className="text-primary">Enter the Loo Q!</h3>
-                                <form noValidate onSubmit={this.handleEnqueue}>
-                                    <div className="input-group mb-3">
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Describe your intent..."
-                                            onChange={this.handleQueueNoteChange}
-                                            value={this.state.queueNote}
-                                        />
-                                        <div className="input-group-append">
-                                            <button className="btn btn-outline-primary" type="submit">
-                                                GO
-                                            </button>
-                                        </div>
+                        <div>
+                            <h3 className="text-primary">Enter the Loo Q!</h3>
+                            <form noValidate onSubmit={this.handleEnqueue}>
+                                <div className="input-group mb-3">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Describe your intent..."
+                                        onChange={this.handleQueueNoteChange}
+                                        value={this.state.queueNote}
+                                    />
+                                    <div className="input-group-append">
+                                        <button className="btn btn-outline-primary" type="submit">
+                                            GO
+                                        </button>
                                     </div>
-                                </form>
-                            </div>
-                        )}
+                                </div>
+                            </form>
+                        </div>
 
                         <h3 className="text-warning mt-3" style={{ paddingTop: "300px" }}>
                             Clear my user data <small className="text-muted">(logged in as {this.state.user})</small>
