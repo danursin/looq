@@ -242,7 +242,7 @@ class Main extends React.Component<{}, IMainState> {
                                             <div className="d-flex justify-content-between">
                                                 <h4 className="mb-0 my-auto">
                                                     <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                                    {item.user}
+                                                    {item.user.user}
                                                 </h4>
 
                                                 {item.note && <span className="text-muted my-auto">{item.note}</span>}
