@@ -2,23 +2,23 @@ import * as React from "react";
 import * as io from "socket.io-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-interface IAppState {
-    queue: Array<{
-        user: {
-            user: string;
-            id: string;
-        };
-        note?: string;
-    }>;
-    users: Array<{
-        user: string;
-        id: string;
-    }>;
+export interface IAppUser {
+    id: string;
+    name?: string;
+}
+
+export interface IQueueEntry {
+    user: IAppUser;
+    note?: string;
+}
+
+export interface IAppState {
     loo: string;
+    users: IAppUser[];
+    queue: IQueueEntry[];
 }
 
 interface IMainState {
-    id: string | null;
     user: string;
     loo: string;
     queueNote: string;
@@ -33,42 +33,31 @@ class Main extends React.Component<{}, IMainState> {
 
         this.socket = io("https://looq.herokuapp.com/");
 
-        this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleLooNameChange = this.handleLooNameChange.bind(this);
-        this.handleNameSubmit = this.handleNameSubmit.bind(this);
-        this.handleLooNameSubmit = this.handleLooNameSubmit.bind(this);
-        this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
-        this.handleResetApp = this.handleResetApp.bind(this);
         this.handleClearUser = this.handleClearUser.bind(this);
-        this.handleEnqueue = this.handleEnqueue.bind(this);
         this.handleDequeue = this.handleDequeue.bind(this);
+        this.handleEnqueue = this.handleEnqueue.bind(this);
+        this.handleLooNameChange = this.handleLooNameChange.bind(this);
+        this.handleLooNameSubmit = this.handleLooNameSubmit.bind(this);
+        this.handleNameChange = this.handleNameChange.bind(this);
+        this.handleNameSubmit = this.handleNameSubmit.bind(this);
         this.handleQueueNoteChange = this.handleQueueNoteChange.bind(this);
-        this.handleSocketRegistration = this.handleSocketRegistration.bind(this);
+        this.handleResetApp = this.handleResetApp.bind(this);
+        this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
+        this.isUserActive = this.isUserActive.bind(this);
+        this.isUserInQueue = this.isUserInQueue.bind(this);
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
-        this.userIsInQueue = this.userIsInQueue.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
 
-        this.state = { user, id: null, loo: "", queueNote: "", isEditingLoo: false };
+        this.state = { user, loo: "", queueNote: "", isEditingLoo: false };
 
         this.socket.on("update", this.handleSocketStateChange);
-        this.socket.on("register", this.handleSocketRegistration);
     }
 
     public componentDidMount() {
         if (this.state.user) {
-            this.socket.emit("register", {
-                id: this.socket.id,
-                user: this.state.user
-            });
+            this.socket.emit("register", this.state.user);
         }
-    }
-
-    public handleSocketRegistration(data: { id: string; state: IAppState }) {
-        this.setState({
-            id: data.id,
-            appState: data.state
-        });
     }
 
     public handleSocketStateChange(appState: IAppState) {
@@ -96,10 +85,7 @@ class Main extends React.Component<{}, IMainState> {
         if (!this.state.loo) {
             return;
         }
-        this.socket.emit("set-loo", this.state.loo, (ack: any) => {
-            console.log(ack);
-        });
-
+        this.socket.emit("set-loo", this.state.loo);
         this.setState({ isEditingLoo: false });
     }
 
@@ -109,17 +95,14 @@ class Main extends React.Component<{}, IMainState> {
             return;
         }
         localStorage.setItem("APP_USERNAME", this.state.user);
-        this.socket.emit("register", {
-            id: this.socket.id,
-            user: this.state.user
-        });
+        this.socket.emit("register", this.state.user);
     }
 
     public handleResetApp() {
         if (confirm("Are you sure you want to reset the app?")) {
             localStorage.removeItem("APP_USERNAME");
             this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
-            this.socket.emit("clear");
+            this.socket.emit("clear-app");
         }
     }
 
@@ -134,17 +117,10 @@ class Main extends React.Component<{}, IMainState> {
 
     public handleEnqueue(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        this.socket.emit("enqueue", {
-            id: this.state.id,
-            note: this.state.queueNote
-        });
+        this.socket.emit("enqueue", this.state.queueNote);
         this.setState({
             queueNote: ""
         });
-    }
-
-    public userIsInQueue(): boolean {
-        return !!this.state.appState && !this.state.appState.users.find(u => u.id === this.socket.id);
     }
 
     public handleDequeue() {
@@ -153,6 +129,14 @@ class Main extends React.Component<{}, IMainState> {
 
     public setIsEditingLoo(state: boolean) {
         this.setState({ isEditingLoo: state });
+    }
+
+    public isUserActive(user: IAppUser): boolean {
+        return !!this.state.appState && this.state.appState.users.some(u => u.name === user.name);
+    }
+
+    public isUserInQueue(): boolean {
+        return !!this.state.appState && this.state.appState.queue.some(q => q.user.name === this.state.user);
     }
 
     public render() {
@@ -240,16 +224,18 @@ class Main extends React.Component<{}, IMainState> {
                                     {this.state.appState.queue.map((item, index) => (
                                         <li className="list-group-item" key={index}>
                                             <div className="d-flex justify-content-between">
-                                                <h4 className="mb-0 my-auto">
+                                                <h4 className={`mb-0 my-auto ${this.isUserActive(item.user) ? "text-success" : ""}`}>
                                                     <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                                    {item.user.user}
+                                                    {item.user.name}
                                                 </h4>
 
                                                 {item.note && <span className="text-muted my-auto">{item.note}</span>}
 
-                                                <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
-                                                    <FontAwesomeIcon icon="trash" />
-                                                </button>
+                                                {this.state.user === item.user.name && (
+                                                    <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
+                                                        <FontAwesomeIcon icon="trash" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </li>
                                     ))}
@@ -257,25 +243,27 @@ class Main extends React.Component<{}, IMainState> {
                             </div>
                         )}
 
-                        <div>
-                            <h3 className="text-primary">Enter the Loo Q!</h3>
-                            <form noValidate onSubmit={this.handleEnqueue}>
-                                <div className="input-group mb-3">
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Describe your intent..."
-                                        onChange={this.handleQueueNoteChange}
-                                        value={this.state.queueNote}
-                                    />
-                                    <div className="input-group-append">
-                                        <button className="btn btn-outline-primary" type="submit">
-                                            GO
-                                        </button>
+                        {!this.isUserInQueue() && (
+                            <div>
+                                <h3 className="text-primary">Enter the Loo Q!</h3>
+                                <form noValidate onSubmit={this.handleEnqueue}>
+                                    <div className="input-group mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Describe your intent..."
+                                            onChange={this.handleQueueNoteChange}
+                                            value={this.state.queueNote}
+                                        />
+                                        <div className="input-group-append">
+                                            <button className="btn btn-outline-primary" type="submit">
+                                                GO
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </form>
-                        </div>
+                                </form>
+                            </div>
+                        )}
 
                         <h3 className="text-warning mt-3" style={{ paddingTop: "300px" }}>
                             Clear my user data <small className="text-muted">(logged in as {this.state.user})</small>
