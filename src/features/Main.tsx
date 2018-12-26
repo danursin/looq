@@ -230,12 +230,13 @@ class Main extends React.Component<{}, IMainState> {
                                                 </h4>
 
                                                 {item.note && <span className="text-muted my-auto">{item.note}</span>}
-
-                                                {this.state.user === item.user.name && (
-                                                    <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
-                                                        <FontAwesomeIcon icon="trash" />
-                                                    </button>
-                                                )}
+                                                <div>
+                                                    {this.state.user === item.user.name && (
+                                                        <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
+                                                            <FontAwesomeIcon icon="trash" />
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
                                         </li>
                                     ))}
