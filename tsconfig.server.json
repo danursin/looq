@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "target": "esnext",
+        "moduleResolution": "node"
+    },
+    "exclude": ["node_modules", "build", "src", "scripts", "acceptance-tests", "webpack", "jest", "src/setupTests.ts"]
+}
