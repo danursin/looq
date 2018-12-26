@@ -28,7 +28,6 @@ class LooService {
     }
     removeUser(id) {
         this.state.users = this.state.users.filter(u => u.id !== id);
-        this.state.queue = this.state.queue.filter(q => q.user.id !== id);
         return this.state;
     }
     enqueue(entry) {
