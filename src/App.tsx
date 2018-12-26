@@ -8,7 +8,17 @@ import { faUserAlt, faPencilAlt, faInfoCircle, faTrash, faToilet, faToiletPaper 
 
 library.add(faUserAlt, faPencilAlt, faInfoCircle, faTrash, faToilet, faToiletPaper);
 
-class App extends React.Component {
+interface IRootState {
+    username?: string;
+}
+class App extends React.Component<{}, IRootState> {
+    constructor(props: {}) {
+        super(props);
+        const username: string | null = localStorage.getItem("APP_USERNAME");
+
+        this.state = { username: username || undefined };
+    }
+
     public render() {
         return (
             <div>
@@ -17,11 +27,12 @@ class App extends React.Component {
                         <img src={logo} width="30" height="30" alt="" />
                         <span className="pl-2">loo q</span>
                     </a>
+                    {this.state.username && <span className="nav-item badge badge-secondary badge-pill">{this.state.username}</span>}
                 </nav>
                 <div className="container-fluid">
                     <div className="row">
                         <div className="col">
-                            <Main />
+                            <Main setUsername={username => this.setState({ username })} />
                         </div>
                     </div>
                 </div>

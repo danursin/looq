@@ -26,9 +26,13 @@ interface IMainState {
     appState?: IAppState;
 }
 
-class Main extends React.Component<{}, IMainState> {
+interface IMainProps {
+    setUsername: (username: string | undefined) => void;
+}
+
+class Main extends React.Component<IMainProps, IMainState> {
     private socket: SocketIOClient.Socket;
-    constructor(props: {}) {
+    constructor(props: IMainProps) {
         super(props);
 
         this.socket = io("https://looq.herokuapp.com/");
@@ -48,10 +52,9 @@ class Main extends React.Component<{}, IMainState> {
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
 
         const user = localStorage.getItem("APP_USERNAME") || "";
-
         this.state = { user, loo: "", queueNote: "", isEditingLoo: false };
-
         this.socket.on("update", this.handleSocketStateChange);
+        this.props.setUsername(user);
     }
 
     public componentDidMount() {
@@ -96,6 +99,7 @@ class Main extends React.Component<{}, IMainState> {
         }
         localStorage.setItem("APP_USERNAME", this.state.user);
         this.socket.emit("register", this.state.user);
+        this.props.setUsername(this.state.user);
     }
 
     public handleResetApp() {
@@ -103,6 +107,7 @@ class Main extends React.Component<{}, IMainState> {
             localStorage.removeItem("APP_USERNAME");
             this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
             this.socket.emit("clear-app");
+            this.props.setUsername(undefined);
         }
     }
 
@@ -112,6 +117,7 @@ class Main extends React.Component<{}, IMainState> {
             localStorage.removeItem("APP_USERNAME");
             this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
             this.socket.emit("clear-user", oldUsername);
+            this.props.setUsername(undefined);
         }
     }
 
@@ -229,7 +235,11 @@ class Main extends React.Component<{}, IMainState> {
                                                     {item.user.name}
                                                 </h4>
 
-                                                {item.note && <span className="text-muted my-auto">{item.note}</span>}
+                                                {item.note && (
+                                                    <span className="text-muted my-auto">
+                                                        <span className="font-weight-italic">Intends to</span> {item.note}
+                                                    </span>
+                                                )}
                                                 <div>
                                                     {this.state.user === item.user.name && (
                                                         <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
@@ -267,14 +277,14 @@ class Main extends React.Component<{}, IMainState> {
                         )}
 
                         <h3 className="text-warning mt-3" style={{ paddingTop: "300px" }}>
-                            Clear my user data <small className="text-muted">(logged in as {this.state.user})</small>
+                            Clear my user data <small className="text-muted" />
                         </h3>
                         <button type="button" className="btn btn-block btn-outline-warning" onClick={this.handleClearUser}>
                             Clear your current settings
                         </button>
 
                         <h3 className="text-danger mt-3">Reset</h3>
-                        <button type="button" className="btn btn-block btn-outline-danger" onClick={this.handleResetApp}>
+                        <button type="button" className="btn btn-block btn-outline-danger mb-3" onClick={this.handleResetApp}>
                             Reset app to initial state
                         </button>
                     </div>
