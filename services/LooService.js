@@ -35,8 +35,8 @@ class LooService {
         this.state.queue.push(entry);
         return this.state;
     }
-    dequeue(user) {
-        this.state.queue.filter(q => q.user === user);
+    dequeue(id) {
+        this.state.queue = this.state.queue.filter(q => q.user.id !== id);
         return this.state;
     }
     setLooName(name) {

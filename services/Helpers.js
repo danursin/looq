@@ -26,8 +26,7 @@ function handleConnection(socket) {
         socket.broadcast.emit(primaryEvent, state);
     });
     socket.on("dequeue", () => {
-        const user = looService.getUser(id);
-        const state = looService.dequeue(user);
+        const state = looService.dequeue(id);
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });

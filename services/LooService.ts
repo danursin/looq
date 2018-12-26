@@ -39,8 +39,8 @@ export class LooService {
         return this.state;
     }
 
-    public dequeue(user: IAppUser): IAppState {
-        this.state.queue.filter(q => q.user.id === user.id);
+    public dequeue(id: string): IAppState {
+        this.state.queue = this.state.queue.filter(q => q.user.id !== id);
         return this.state;
     }
 
