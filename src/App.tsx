@@ -4,9 +4,9 @@ import logo from "./logo.png";
 import Main from "./features/Main";
 
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faUserAlt, faPencilAlt, faInfoCircle, faTrash, faToilet, faToiletPaper } from "@fortawesome/free-solid-svg-icons";
+import { faUserAlt, faPencilAlt, faCog, faInfoCircle, faTrash, faToilet, faToiletPaper } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faUserAlt, faPencilAlt, faInfoCircle, faTrash, faToilet, faToiletPaper);
+library.add(faUserAlt, faPencilAlt, faCog, faInfoCircle, faTrash, faToilet, faToiletPaper);
 
 interface IRootState {
     username?: string;
@@ -32,7 +32,7 @@ class App extends React.Component<{}, IRootState> {
                 <div className="container-fluid">
                     <div className="row">
                         <div className="col">
-                            <Main setUsername={username => this.setState({ username })} />
+                            <Main username={this.state.username} setUsername={username => this.setState({ username })} />
                         </div>
                     </div>
                 </div>

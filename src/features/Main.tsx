@@ -1,6 +1,8 @@
 import * as React from "react";
-import * as io from "socket.io-client";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Register from "./Register";
+import ss from "../services/SocketService";
+import LooEditor from "./LooEditor";
 
 export interface IAppUser {
     id: string;
@@ -19,7 +21,6 @@ export interface IAppState {
 }
 
 interface IMainState {
-    user: string;
     loo: string;
     queueNote: string;
     isEditingLoo: boolean;
@@ -27,44 +28,33 @@ interface IMainState {
 }
 
 interface IMainProps {
+    username: string | undefined;
     setUsername: (username: string | undefined) => void;
 }
 
 class Main extends React.Component<IMainProps, IMainState> {
-    private socket: SocketIOClient.Socket;
     constructor(props: IMainProps) {
         super(props);
-
-        this.socket = io("https://looq.herokuapp.com/");
 
         this.handleClearUser = this.handleClearUser.bind(this);
         this.handleDequeue = this.handleDequeue.bind(this);
         this.handleEnqueue = this.handleEnqueue.bind(this);
         this.handleLooNameChange = this.handleLooNameChange.bind(this);
         this.handleLooNameSubmit = this.handleLooNameSubmit.bind(this);
-        this.handleNameChange = this.handleNameChange.bind(this);
-        this.handleNameSubmit = this.handleNameSubmit.bind(this);
         this.handleQueueNoteChange = this.handleQueueNoteChange.bind(this);
         this.handleResetApp = this.handleResetApp.bind(this);
+        this.handleRegistration = this.handleRegistration.bind(this);
         this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
         this.isUserActive = this.isUserActive.bind(this);
         this.isUserInQueue = this.isUserInQueue.bind(this);
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
 
-        const user = localStorage.getItem("APP_USERNAME") || "";
-        this.state = { user, loo: "", queueNote: "", isEditingLoo: false };
-        this.socket.on("update", this.handleSocketStateChange);
-        this.props.setUsername(user);
-    }
-
-    public componentDidMount() {
-        if (this.state.user) {
-            this.socket.emit("register", this.state.user);
-        }
+        this.state = { loo: "", queueNote: "", isEditingLoo: false };
+        ss.socket.on("update", this.handleSocketStateChange);
     }
 
     public handleSocketStateChange(appState: IAppState) {
-        if (this.state.user) {
+        if (this.props.username) {
             this.setState({
                 appState
             });
@@ -73,10 +63,6 @@ class Main extends React.Component<IMainProps, IMainState> {
 
     public handleQueueNoteChange(event: React.ChangeEvent<HTMLInputElement>) {
         this.setState({ queueNote: event.target.value });
-    }
-
-    public handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({ user: event.target.value });
     }
 
     public handleLooNameChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -88,49 +74,37 @@ class Main extends React.Component<IMainProps, IMainState> {
         if (!this.state.loo) {
             return;
         }
-        this.socket.emit("set-loo", this.state.loo);
+        ss.setLoo(this.state.loo);
         this.setState({ isEditingLoo: false });
-    }
-
-    public handleNameSubmit(event: React.FormEvent<HTMLFormElement>) {
-        event.preventDefault();
-        if (!this.state.user) {
-            return;
-        }
-        localStorage.setItem("APP_USERNAME", this.state.user);
-        this.socket.emit("register", this.state.user);
-        this.props.setUsername(this.state.user);
     }
 
     public handleResetApp() {
         if (confirm("Are you sure you want to reset the app?")) {
-            localStorage.removeItem("APP_USERNAME");
-            this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
-            this.socket.emit("clear-app");
+            this.setState({ loo: "", queueNote: "", appState: undefined });
             this.props.setUsername(undefined);
+            ss.clearApp();
         }
     }
 
     public handleClearUser() {
         if (confirm("Are you sure you want to clear your user data?")) {
-            const oldUsername = this.state.user;
-            localStorage.removeItem("APP_USERNAME");
-            this.setState({ user: "", loo: "", queueNote: "", appState: undefined });
-            this.socket.emit("clear-user", oldUsername);
+            const oldUsername = this.props.username as string;
+            this.setState({ loo: "", queueNote: "", appState: undefined });
+            ss.clearUser(oldUsername);
             this.props.setUsername(undefined);
         }
     }
 
     public handleEnqueue(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        this.socket.emit("enqueue", this.state.queueNote);
+        ss.enqueue(this.state.queueNote);
         this.setState({
             queueNote: ""
         });
     }
 
     public handleDequeue() {
-        this.socket.emit("dequeue");
+        ss.dequeue();
     }
 
     public setIsEditingLoo(state: boolean) {
@@ -142,79 +116,22 @@ class Main extends React.Component<IMainProps, IMainState> {
     }
 
     public isUserInQueue(): boolean {
-        return !!this.state.appState && this.state.appState.queue.some(q => q.user.name === this.state.user);
+        return !!this.state.appState && this.state.appState.queue.some(q => q.user.name === this.props.username);
+    }
+
+    public handleRegistration(username: string) {
+        this.props.setUsername(username);
+        ss.register(username);
     }
 
     public render() {
         return (
             <div className="mt-2">
-                {!this.state.appState && (
-                    <div className="card">
-                        <div className="card-header bg-primary text-white">Sign in</div>
-                        <div className="card-body">
-                            <h4 className="text-primary">
-                                <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                Enter your moniker
-                            </h4>
-                            <form noValidate onSubmit={this.handleNameSubmit}>
-                                <div className="input-group mb-3">
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="express yourself"
-                                        onChange={this.handleNameChange}
-                                        value={this.state.user}
-                                    />
-                                    <div className="input-group-append">
-                                        <button className="btn btn-outline-primary" type="submit" disabled={!this.state.user}>
-                                            Register
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )}
+                {!this.state.appState && <Register onRegister={this.handleRegistration} username={this.props.username} />}
 
                 {this.state.appState && (
                     <div>
-                        {!this.state.isEditingLoo && (
-                            <h2 className="text-muted">
-                                {this.state.appState.loo}
-
-                                <button
-                                    type="button"
-                                    className="btn btn-link"
-                                    onClick={() => this.setIsEditingLoo(true)}
-                                    title="Edit Loo Name"
-                                >
-                                    <FontAwesomeIcon icon="pencil-alt" />
-                                </button>
-                            </h2>
-                        )}
-                        {this.state.isEditingLoo && (
-                            <form noValidate onSubmit={this.handleLooNameSubmit}>
-                                <div className="input-group mb-3">
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="loo needs a name"
-                                        onChange={this.handleLooNameChange}
-                                        value={this.state.loo}
-                                    />
-                                    <div className="input-group-append">
-                                        <button className="btn btn-outline-dark" type="button" onClick={() => this.setIsEditingLoo(false)}>
-                                            Cancel
-                                        </button>
-                                    </div>
-                                    <div className="input-group-append">
-                                        <button className="btn btn-outline-primary" type="submit" disabled={!this.state.loo}>
-                                            Save
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        )}
+                        <LooEditor loo={this.state.appState.loo} />
 
                         {!this.state.appState.queue.length && (
                             <p className="alert alert-info">
@@ -237,11 +154,11 @@ class Main extends React.Component<IMainProps, IMainState> {
 
                                                 {item.note && (
                                                     <span className="text-muted my-auto">
-                                                        <span className="font-weight-italic">Intends to</span> {item.note}
+                                                        <small className="font-italic">Intends to</small> {item.note}
                                                     </span>
                                                 )}
                                                 <div>
-                                                    {this.state.user === item.user.name && (
+                                                    {this.props.username === item.user.name && (
                                                         <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
                                                             <FontAwesomeIcon icon="trash" />
                                                         </button>
@@ -283,7 +200,7 @@ class Main extends React.Component<IMainProps, IMainState> {
                             Clear your current settings
                         </button>
 
-                        <h3 className="text-danger mt-3">Reset</h3>
+                        <h3 className="text-danger mt-3">Reset App</h3>
                         <button type="button" className="btn btn-block btn-outline-danger mb-3" onClick={this.handleResetApp}>
                             Reset app to initial state
                         </button>
