@@ -24,7 +24,7 @@ export class LooService {
     }
 
     public registerUser(name: string, id: string): IAppState {
-        const user = this.state.users.find(u => u.id === name);
+        const user = this.state.users.find(u => u.id === id);
 
         if (!user) {
             return this.state;
