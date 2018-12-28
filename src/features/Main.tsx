@@ -52,6 +52,12 @@ class Main extends React.Component<IMainProps, IMainState> {
         ss.socket.on("update", this.handleSocketStateChange);
     }
 
+    public componentDidMount() {
+        if (this.props.username) {
+            this.handleRegistration(this.props.username);
+        }
+    }
+
     public handleSocketStateChange(appState: IAppState) {
         if (this.props.username) {
             this.setState({
