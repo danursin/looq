@@ -29,7 +29,7 @@ export class LooService {
         this.state.queue = this.state.queue
             .filter(q => q.user.name === user.name)
             .map(q => {
-                q.user.id = user.id;
+                q.user = user;
                 return q;
             });
 
