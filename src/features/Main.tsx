@@ -50,9 +50,6 @@ class Main extends React.Component<IMainProps, IMainState> {
 
         this.state = { loo: "", queueNote: "", isEditingLoo: false };
         ss.socket.on("update", this.handleSocketStateChange);
-        ss.socket.on("reconnect", () => {
-            ss.socket.emit("reconnect", this.props.username);
-        });
     }
 
     public handleSocketStateChange(appState: IAppState) {
