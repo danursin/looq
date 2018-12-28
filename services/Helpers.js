@@ -5,7 +5,7 @@ const looService = new LooService_1.LooService();
 const primaryEvent = "update";
 function handleConnection(socket) {
     const id = socket.id;
-    const state = looService.addUser({ id });
+    const state = looService.addUserShell(id);
     socket.emit(primaryEvent, state);
     socket.broadcast.emit(primaryEvent, state);
     socket.on("clear-app", () => {
@@ -37,11 +37,6 @@ function handleConnection(socket) {
     });
     socket.on("register", (name) => {
         const state = looService.addUser({ id, name });
-        socket.emit(primaryEvent, state);
-        socket.broadcast.emit(primaryEvent, state);
-    });
-    socket.on("reconnect", (name) => {
-        const state = looService.updateUserID(name, id);
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });

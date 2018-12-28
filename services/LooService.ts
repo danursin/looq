@@ -24,21 +24,14 @@ export class LooService {
     }
 
     public addUser(user: IAppUser): IAppState {
-        const existingUser: IAppUser | undefined = this.state.users.find(u => u.name === user.name);
-        if (existingUser) {
-            existingUser.id = user.id;
-        } else {
-            this.state.users.push(user);
-        }
+        this.state.users.push(user);
 
-        if (user.name) {
-            this.state.queue = this.state.queue
-                .filter(q => q.user.name === name)
-                .map(q => {
-                    q.user.id = user.id;
-                    return q;
-                });
-        }
+        this.state.queue = this.state.queue
+            .filter(q => q.user.name === user.name)
+            .map(q => {
+                q.user.id = user.id;
+                return q;
+            });
 
         return this.state;
     }

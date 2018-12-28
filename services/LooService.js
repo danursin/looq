@@ -16,28 +16,16 @@ class LooService {
         }
         return user;
     }
-    addUser(user) {
-        const existingUser = this.state.users.find(u => u.id === user.id);
-        if (existingUser) {
-            existingUser.name = user.name;
-        }
-        else {
-            this.state.users.push(user);
-        }
-        if (user.name) {
-            this.updateUserID(user.name, user.id);
-        }
+    addUserShell(id) {
+        this.state.users.push({ id });
         return this.state;
     }
-    updateUserID(name, id) {
-        const user = this.state.users.find(user => user.name === name);
-        if (user) {
-            user.id = id;
-        }
+    addUser(user) {
+        this.state.users.push(user);
         this.state.queue = this.state.queue
-            .filter(q => q.user.name === name)
+            .filter(q => q.user.name === user.name)
             .map(q => {
-            q.user.id = id;
+            q.user.id = user.id;
             return q;
         });
         return this.state;
