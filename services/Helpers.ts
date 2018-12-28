@@ -48,6 +48,12 @@ export function handleConnection(socket: socketIO.Socket): void {
         socket.broadcast.emit(primaryEvent, state);
     });
 
+    socket.on("reconnect", (name: string) => {
+        const state = looService.updateUserID(name, id);
+        socket.emit(primaryEvent, state);
+        socket.broadcast.emit(primaryEvent, state);
+    });
+
     socket.on("disconnect", () => {
         const state = looService.removeUser(id);
         socket.broadcast.emit(primaryEvent, state);

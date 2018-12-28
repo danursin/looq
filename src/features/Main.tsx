@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Register from "./Register";
 import ss from "../services/SocketService";
 import LooEditor from "./LooEditor";
+import Queue from "./Queue";
 
 export interface IAppUser {
     id: string;
@@ -37,7 +38,6 @@ class Main extends React.Component<IMainProps, IMainState> {
         super(props);
 
         this.handleClearUser = this.handleClearUser.bind(this);
-        this.handleDequeue = this.handleDequeue.bind(this);
         this.handleEnqueue = this.handleEnqueue.bind(this);
         this.handleLooNameChange = this.handleLooNameChange.bind(this);
         this.handleLooNameSubmit = this.handleLooNameSubmit.bind(this);
@@ -45,12 +45,14 @@ class Main extends React.Component<IMainProps, IMainState> {
         this.handleResetApp = this.handleResetApp.bind(this);
         this.handleRegistration = this.handleRegistration.bind(this);
         this.handleSocketStateChange = this.handleSocketStateChange.bind(this);
-        this.isUserActive = this.isUserActive.bind(this);
         this.isUserInQueue = this.isUserInQueue.bind(this);
         this.setIsEditingLoo = this.setIsEditingLoo.bind(this);
 
         this.state = { loo: "", queueNote: "", isEditingLoo: false };
         ss.socket.on("update", this.handleSocketStateChange);
+        ss.socket.on("reconnect", () => {
+            ss.socket.emit("reconnect", this.props.username);
+        });
     }
 
     public handleSocketStateChange(appState: IAppState) {
@@ -103,16 +105,8 @@ class Main extends React.Component<IMainProps, IMainState> {
         });
     }
 
-    public handleDequeue() {
-        ss.dequeue();
-    }
-
     public setIsEditingLoo(state: boolean) {
         this.setState({ isEditingLoo: state });
-    }
-
-    public isUserActive(user: IAppUser): boolean {
-        return !!this.state.appState && this.state.appState.users.some(u => u.name === user.name);
     }
 
     public isUserInQueue(): boolean {
@@ -140,35 +134,8 @@ class Main extends React.Component<IMainProps, IMainState> {
                             </p>
                         )}
 
-                        {!!this.state.appState.queue.length && (
-                            <div>
-                                <h3 className="text-primary">Current Loo Q</h3>
-                                <ul className="list-group">
-                                    {this.state.appState.queue.map((item, index) => (
-                                        <li className="list-group-item" key={index}>
-                                            <div className="d-flex justify-content-between">
-                                                <h4 className={`mb-0 my-auto ${this.isUserActive(item.user) ? "text-success" : ""}`}>
-                                                    <FontAwesomeIcon icon="user-alt" className="mr-1" />
-                                                    {item.user.name}
-                                                </h4>
-
-                                                {item.note && (
-                                                    <span className="text-muted my-auto">
-                                                        <small className="font-italic">Intends to</small> {item.note}
-                                                    </span>
-                                                )}
-                                                <div>
-                                                    {this.props.username === item.user.name && (
-                                                        <button type="button" className="btn btn-link" onClick={this.handleDequeue}>
-                                                            <FontAwesomeIcon icon="trash" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                        {!!this.props.username && !!this.state.appState.queue.length && (
+                            <Queue appState={this.state.appState} username={this.props.username} />
                         )}
 
                         {!this.isUserInQueue() && (

@@ -32,7 +32,7 @@ class App extends React.Component<{}, IRootState> {
                 <div className="container-fluid">
                     <div className="row">
                         <div className="col">
-                            <Main username={this.state.username} setUsername={username => this.setState({ username })} />
+                            <Main username={this.state.username} setUsername={(username: string) => this.setState({ username })} />
                         </div>
                     </div>
                 </div>
