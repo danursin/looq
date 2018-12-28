@@ -26,6 +26,19 @@ class LooService {
         }
         return this.state;
     }
+    updateUserID(name, id) {
+        const user = this.state.users.find(user => user.name === name);
+        if (user) {
+            user.id = id;
+        }
+        this.state.queue = this.state.queue
+            .filter(q => q.user.name === name)
+            .map(q => {
+            q.user.id = id;
+            return q;
+        });
+        return this.state;
+    }
     removeUser(id) {
         this.state.users = this.state.users.filter(u => u.id !== id);
         return this.state;
