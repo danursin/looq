@@ -72,7 +72,7 @@ class LooEditor extends React.Component<ILooEditorProps, ILooEditorState> {
                                 </button>
                             </div>
                             <div className="input-group-append">
-                                <button className="btn btn-outline-primary" type="submit" disabled={!this.state.loo}>
+                                <button className="btn btn-outline-primary" type="submit">
                                     Save
                                 </button>
                             </div>

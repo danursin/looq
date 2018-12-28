@@ -21,12 +21,12 @@ class Queue extends React.Component<IQueueProps> {
     }
 
     public handleDequeue(user: IAppUser) {
-        ss.dequeue();
         if (user.name !== this.props.username) {
             if (!confirm("That's not you... Are you sure they should leave the queue?")) {
                 return;
             }
         }
+        ss.dequeue();
     }
 
     public render() {
@@ -39,12 +39,7 @@ class Queue extends React.Component<IQueueProps> {
                                 <span className="badge badge-dark">{index + 1}</span>
                             </td>
                             <td className="align-middle">
-                                <h4 className={`mb-0  ${this.isUserActive(item.user) ? "text-success" : ""}`}>
-                                    <span>
-                                        <FontAwesomeIcon icon="user-alt" className="mx-2" />
-                                        {item.user.name}
-                                    </span>
-                                </h4>
+                                <span className={this.isUserActive(item.user) ? "text-success" : ""}>{item.user.name}</span>
                             </td>
                             <td className="align-middle">
                                 {item.note && (
