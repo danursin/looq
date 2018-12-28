@@ -26,7 +26,7 @@ class Queue extends React.Component<IQueueProps> {
                 return;
             }
         }
-        ss.dequeue();
+        ss.dequeue(user.name);
     }
 
     public render() {

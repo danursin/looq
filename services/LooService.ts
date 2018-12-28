@@ -23,11 +23,17 @@ export class LooService {
         return this.state;
     }
 
-    public addUser(user: IAppUser): IAppState {
-        this.state.users.push(user);
+    public registerUser(name: string, id: string): IAppState {
+        const user = this.state.users.find(u => u.id === name);
+
+        if (!user) {
+            return this.state;
+        }
+
+        user.name = name;
 
         this.state.queue = this.state.queue
-            .filter(q => q.user.name === user.name)
+            .filter(q => q.user.name === name)
             .map(q => {
                 q.user = user;
                 return q;
@@ -46,8 +52,8 @@ export class LooService {
         return this.state;
     }
 
-    public dequeue(id: string): IAppState {
-        this.state.queue = this.state.queue.filter(q => q.user.id !== id);
+    public dequeue(name: string): IAppState {
+        this.state.queue = this.state.queue.filter(q => q.user.name !== name);
         return this.state;
     }
 

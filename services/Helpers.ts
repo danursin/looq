@@ -7,6 +7,7 @@ const primaryEvent = "update";
 export function handleConnection(socket: socketIO.Socket): void {
     const id = socket.id;
     const state = looService.addUserShell(id);
+
     socket.emit(primaryEvent, state);
     socket.broadcast.emit(primaryEvent, state);
 
@@ -43,7 +44,7 @@ export function handleConnection(socket: socketIO.Socket): void {
     });
 
     socket.on("register", (name: string) => {
-        const state = looService.addUser({ id, name });
+        const state = looService.registerUser(name, id);
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });

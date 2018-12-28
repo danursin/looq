@@ -36,7 +36,7 @@ function handleConnection(socket) {
         socket.broadcast.emit(primaryEvent, state);
     });
     socket.on("register", (name) => {
-        const state = looService.addUser({ id, name });
+        const state = looService.registerUser(name, id);
         socket.emit(primaryEvent, state);
         socket.broadcast.emit(primaryEvent, state);
     });

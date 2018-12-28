@@ -20,10 +20,14 @@ class LooService {
         this.state.users.push({ id });
         return this.state;
     }
-    addUser(user) {
-        this.state.users.push(user);
+    registerUser(name, id) {
+        const user = this.state.users.find(u => u.id === name);
+        if (!user) {
+            return this.state;
+        }
+        user.name = name;
         this.state.queue = this.state.queue
-            .filter(q => q.user.name === user.name)
+            .filter(q => q.user.name === name)
             .map(q => {
             q.user = user;
             return q;
@@ -38,8 +42,8 @@ class LooService {
         this.state.queue.push(entry);
         return this.state;
     }
-    dequeue(id) {
-        this.state.queue = this.state.queue.filter(q => q.user.id !== id);
+    dequeue(name) {
+        this.state.queue = this.state.queue.filter(q => q.user.name !== name);
         return this.state;
     }
     setLooName(name) {

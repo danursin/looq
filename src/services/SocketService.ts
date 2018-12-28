@@ -22,8 +22,8 @@ class SocketService {
         this.socket.emit("enqueue", note);
     }
 
-    public dequeue() {
-        this.socket.emit("dequeue");
+    public dequeue(username?: string) {
+        this.socket.emit("dequeue", username);
     }
 
     public clearApp() {
