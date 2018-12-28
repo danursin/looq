@@ -21,10 +21,12 @@ class LooService {
         return this.state;
     }
     registerUser(name, id) {
-        const user = this.state.users.find(u => u.id === name);
+        const user = this.state.users.find(u => u.id === id);
         if (!user) {
+            console.log(`No user found in ${JSON.stringify(this.state.users)} with id: ${id} and name: ${name}`);
             return this.state;
         }
+        console.log(`Found user ${JSON.stringify(user)} from id: ${id} and name: ${name}`);
         user.name = name;
         this.state.queue = this.state.queue
             .filter(q => q.user.name === name)
