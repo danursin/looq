@@ -25,6 +25,11 @@ export class LooService {
         } else {
             this.state.users.push(user);
         }
+
+        if (user.name) {
+            this.updateUserID(user.name, user.id);
+        }
+
         return this.state;
     }
 
